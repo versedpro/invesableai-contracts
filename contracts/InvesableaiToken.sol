@@ -17,18 +17,18 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     string private _symbol;
     uint8 private _decimals;
 
-    uint256 public maxSupply = 50_000_000 * 10 ** 18; // 50,000,000 token
+    uint256 public maxSupply;
     uint256 public devFee;
     uint256 public liquidityFee;
     uint256 public buybackFee;
 
-    uint256 public maxTransferAmountRate = 50;
+    uint256 public maxTransferAmountRate;
 
     address public devTo;
     address public buybackTo;
 
     bool inSwapAndLiquify;
-    bool public swapAndLiquifyEnabled = true;
+    bool public swapAndLiquifyEnabled;
 
     IUniswapV2Router02 public uniswapV2Router;
     address public invaEthPair;
@@ -100,6 +100,9 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         devTo = _devTo;
         buybackTo = _buybackTo;
 
+        maxSupply = 50_000_000 * 10 ** 18; // 50,000,000 token
+        maxTransferAmountRate = 50;
+        swapAndLiquifyEnabled = true;
         devFee = 4; // 0.04%
         liquidityFee = 3; // 0.03%
         buybackFee = 3; // 0.03%
