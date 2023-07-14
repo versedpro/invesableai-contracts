@@ -7,7 +7,8 @@
     "compile": "npx hardhat compile",
     "test": "npx hardhat test",
     "deploy:mainnet": "npx hardhat run --network mainnet scripts/deploy.ts",
-    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.ts"
+    "deploy:goerli": "npx hardhat run --network goerli scripts/deploy.ts",
+    "verify": "npx hardhat verify --network goerli 0x2fE423Ae9836694f81Ad2B4b1eddD090cC4c8e01"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.7.0",
@@ -38,6 +39,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.2",
     "@openzeppelin/contracts-upgradeable": "^4.9.2",
+    "@openzeppelin/hardhat-upgrades": "^2.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "dotenv": "^16.3.1"
   }

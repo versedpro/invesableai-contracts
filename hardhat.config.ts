@@ -1,7 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
+import "@openzeppelin/hardhat-upgrades";
 import "@nomicfoundation/hardhat-ethers";
-// import "@nomiclabs/hardhat-waffle";
-import "@nomiclabs/hardhat-etherscan";
+import "@nomicfoundation/hardhat-toolbox";
 import * as dotenv from "dotenv";
 dotenv.config();
 import { EtherscanConfig } from "@nomiclabs/hardhat-etherscan/dist/src/types";
@@ -41,6 +41,7 @@ const config: Config = {
     customChains: [],
     apiKey: {
       goerli: "T3S7NPQWMYC4ZTSS4YTU3F848XP7JAD2CE",
+      sepolia: "YIUBT2TCTDZW5HWTV73GT3QAVY2R1JIZY5",
       mainnet: "YIUBT2TCTDZW5HWTV73GT3QAVY2R1JIZY5",
     },
   },
