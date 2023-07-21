@@ -68,7 +68,7 @@ contract Presale is Ownable, ReentrancyGuard {
             minPurchase: 3_000 * 10 ** 18, // 3000 token for test
             // minPurchase:  3_000 * 10 ** 18, // 300 token,
             maxPurchase: 25_000 * 10 ** 18, // 25000 token,
-            tokensAvailable: 6_000_000, // 6000000 token,
+            tokensAvailable: 6_000_000 * 10 ** 18, // 6000000 token,
             tokenPrice: 0.04 * 10 ** 18, // 0.04 USD,
             tokensSold: 0
         });
