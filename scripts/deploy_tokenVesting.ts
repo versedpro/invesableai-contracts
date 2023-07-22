@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 async function main() {
   const tokenVesting = await ethers.deployContract("TokenVesting", [
-    "0xd69c5bd501a9c6df079c1ce59dc0484404e5e7d6", // AIF on Sepolia
+    "0xB26502507C35c6C46F8A04b4c38BCfF97dC38bB9", // AIF on Sepolia
   ]);
 
   await tokenVesting.waitForDeployment();
