@@ -20,7 +20,8 @@ npx hardhat verify --network <chain_name> <proxy_address>
 
 - Proxy: [0xd69c5bd501a9c6df079c1ce59dc0484404e5e7d6](https://sepolia.etherscan.io/address/0xd69c5bd501a9c6df079c1ce59dc0484404e5e7d6#code)
 - Implementation: [0x5f3eda2a057beb63448ff4d2845ebd059fe5cc41](https://sepolia.etherscan.io/address/0x5f3eda2a057beb63448ff4d2845ebd059fe5cc41#code)
-- Presale Contract: [0xCd1C8505db1ADD99A1dcc759d7257cCdB7A11067](https://sepolia.etherscan.io/address/0xCd1C8505db1ADD99A1dcc759d7257cCdB7A11067#code)
+- Presale Contract: [0x4f9591d4A215e3Fe024C9E273872fDFf3edd5002](https://sepolia.etherscan.io/address/0xCd1C8505db1ADD99A1dcc759d7257cCdB7A11067#code)
+- Vesting: [0x93F7f6c05232BF04f9c9AC2a0195fA83cBa2135c]()
 
 ### Goerli
 
