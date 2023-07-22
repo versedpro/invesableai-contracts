@@ -7,15 +7,32 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
+    /// @dev A checkpoint for marking number of votes from a given block
+    struct Checkpoint {
+        uint32 fromBlock;
+        uint256 votes;
+    }
+
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
 
-    uint256 private _totalSupply;
+    mapping(address => bool) private _excludedFromAntiWhale;
+    mapping(address => bool) whitelist;
 
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    /// @dev A record of each accounts delegate
+    mapping(address => address) internal _delegates;
+
+    /// @dev A record of states for signing / validating signatures
+    mapping(address => uint) public nonces;
+
+    /// @dev A record of votes checkpoints for each account, by index
+    mapping(address => mapping(uint32 => Checkpoint)) public checkpoints;
+
+    /// @dev The number of checkpoints for each account
+    mapping(address => uint32) public numCheckpoints;
+
+    uint256 private _totalSupply;
 
     uint256 public maxSupply;
     uint256 public devFee;
@@ -24,19 +41,44 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
 
     uint256 public maxTransferAmountRate;
 
+    string private _name;
+    string private _symbol;
+    uint8 private _decimals;
+
     address public devTo;
     address public buybackTo;
 
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled;
+    bool public transferEnabled;
 
-    IUniswapV2Router02 public uniswapV2Router;
     address public invaEthPair;
+    IUniswapV2Router02 public uniswapV2Router;
 
-    mapping(address => bool) private _excludedFromAntiWhale;
-    mapping(address => bool) whitelist;
+    /// @dev The EIP-712 typehash for the contract's domain
+    bytes32 public constant DOMAIN_TYPEHASH =
+        keccak256(
+            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
+        );
 
-    event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
+    /// @dev The EIP-712 typehash for the delegation struct used by the contract
+    bytes32 public constant DELEGATION_TYPEHASH =
+        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
+
+    /// @dev An event thats emitted when an account changes its delegate
+    event DelegateChanged(
+        address indexed delegator,
+        address indexed fromDelegate,
+        address indexed toDelegate
+    );
+
+    /// @dev An event thats emitted when a delegate account's vote balance changes
+    event DelegateVotesChanged(
+        address indexed delegate,
+        uint previousBalance,
+        uint newBalance
+    );
+
     event SwapAndLiquifyEnabledUpdated(bool enabled);
     event SwapAndLiquify(
         uint256 tokensSwapped,
@@ -49,6 +91,7 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         uint256 total
     );
     event SetWhiteList(address indexed addr, bool status);
+    event TransferEnabled(bool enabled);
 
     modifier lockTheSwap() {
         inSwapAndLiquify = true;
@@ -75,6 +118,11 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         _;
     }
 
+    modifier transferable() {
+        require(transferEnabled == true, "INVA: Transfer disabled yet");
+        _;
+    }
+
     //to recieve ETH from uniswapV2Router when swaping
     receive() external payable {}
 
@@ -85,27 +133,25 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     ) public initializer {
         require(_company != address(0), "INVESABLEAI: company address is zero");
         require(_devTo != address(0), "INVESABLEAI: dev address is zero");
-        require(
-            _buybackTo != address(0),
-            "INVESABLEAI: buyback address is zero"
-        );
 
         // Describe the token
         __ERC20_init("INVESABLEAI", "INVA");
         __Ownable_init();
 
-        // Mint to the contract
-        _mint(_company, maxSupply);
-
         devTo = _devTo;
         buybackTo = _buybackTo;
 
         maxSupply = 50_000_000 * 10 ** 18; // 50,000,000 token
-        maxTransferAmountRate = 50;
+        maxTransferAmountRate = 50; // 0.5%
         swapAndLiquifyEnabled = true;
         devFee = 4; // 0.04%
         liquidityFee = 3; // 0.03%
         buybackFee = 3; // 0.03%
+
+        transferEnabled = false;
+
+        // Mint to the contract
+        _mint(_company, maxSupply);
 
         _excludedFromAntiWhale[msg.sender] = true;
         _excludedFromAntiWhale[address(0)] = true;
@@ -133,6 +179,9 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
             address(uniswapV2Router),
             type(uint).max
         );
+        transferEnabled = true;
+
+        emit TransferEnabled(transferEnabled);
     }
 
     function getOwner() external view returns (address) {
@@ -170,7 +219,7 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         address spender,
         uint256 amount
     ) public override returns (bool) {
-        _approve(_msgSender(), spender, amount);
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
@@ -179,9 +228,9 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         uint256 addedValue
     ) public override returns (bool) {
         _approve(
-            _msgSender(),
+            msg.sender,
             spender,
-            _allowances[_msgSender()][spender] + addedValue
+            _allowances[msg.sender][spender] + addedValue
         );
         return true;
     }
@@ -191,9 +240,9 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         uint256 subtractedValue
     ) public override returns (bool) {
         _approve(
-            _msgSender(),
+            msg.sender,
             spender,
-            _allowances[_msgSender()][spender] - subtractedValue
+            _allowances[msg.sender][spender] - subtractedValue
         );
         return true;
     }
@@ -226,23 +275,24 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     )
         public
         override
-        antiWhale(_msgSender(), recipient, amount)
+        antiWhale(msg.sender, recipient, amount)
+        transferable
         returns (bool)
     {
         require(recipient != address(0), "ERC20: transfer to the zero address");
         require(
-            balanceOf(_msgSender()) >= amount,
+            balanceOf(msg.sender) >= amount,
             "ERC20: transfer amount exceeds balance"
         );
 
-        if (whitelist[recipient] || whitelist[_msgSender()]) {
-            _transfer(_msgSender(), recipient, amount);
+        if (whitelist[recipient] || whitelist[msg.sender]) {
+            _transfer(msg.sender, recipient, amount);
             _moveDelegates(
-                _delegates[_msgSender()],
+                _delegates[msg.sender],
                 _delegates[recipient],
                 amount
             );
-            emit WhitelistedTransfer(_msgSender(), recipient, amount);
+            emit WhitelistedTransfer(msg.sender, recipient, amount);
         } else {
             uint256 devAmount = (amount * devFee) / 10000;
             uint256 buybackAmount = (amount * buybackFee) / 10000;
@@ -250,40 +300,40 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
 
             if (
                 !inSwapAndLiquify &&
-                _msgSender() != invaEthPair &&
+                msg.sender != invaEthPair &&
                 swapAndLiquifyEnabled
             ) {
                 uint256 liquidityAmount = (amount * liquidityFee) / 10000;
                 transferAmount = transferAmount - liquidityAmount;
-                _transfer(_msgSender(), address(this), liquidityAmount);
+                _transfer(msg.sender, address(this), liquidityAmount);
                 swapAndLiquify();
             }
 
             if (recipient == invaEthPair) {
-                _transfer(_msgSender(), recipient, amount);
+                _transfer(msg.sender, recipient, amount);
                 _moveDelegates(
-                    _delegates[_msgSender()],
+                    _delegates[msg.sender],
                     _delegates[recipient],
                     amount
                 );
             } else {
-                _transfer(_msgSender(), recipient, transferAmount);
+                _transfer(msg.sender, recipient, transferAmount);
                 _moveDelegates(
-                    _delegates[_msgSender()],
+                    _delegates[msg.sender],
                     _delegates[recipient],
                     transferAmount
                 );
 
-                _transfer(_msgSender(), devTo, devAmount);
+                _transfer(msg.sender, devTo, devAmount);
                 _moveDelegates(
-                    _delegates[_msgSender()],
+                    _delegates[msg.sender],
                     _delegates[devTo],
                     devAmount
                 );
 
-                _transfer(_msgSender(), buybackTo, buybackAmount);
+                _transfer(msg.sender, buybackTo, buybackAmount);
                 _moveDelegates(
-                    _delegates[_msgSender()],
+                    _delegates[msg.sender],
                     _delegates[buybackTo],
                     buybackAmount
                 );
@@ -297,7 +347,13 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         address sender,
         address recipient,
         uint256 amount
-    ) public override antiWhale(sender, recipient, amount) returns (bool) {
+    )
+        public
+        override
+        antiWhale(sender, recipient, amount)
+        transferable
+        returns (bool)
+    {
         require(sender != address(0), "ERC20: transfer to the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -352,11 +408,7 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
                 );
             }
         }
-        _approve(
-            sender,
-            _msgSender(),
-            allowance(sender, _msgSender()) - amount
-        );
+        _approve(sender, msg.sender, allowance(sender, msg.sender) - amount);
         return true;
     }
 
@@ -476,48 +528,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     // https://github.com/yam-finance/yam-protocol/blob/master/contracts/token/YAMGovernance.sol
     // Which is copied and modified from COMPOUND:
     // https://github.com/compound-finance/compound-protocol/blob/master/contracts/Governance/Comp.sol
-
-    /// @dev A record of each accounts delegate
-    mapping(address => address) internal _delegates;
-
-    /// @dev A checkpoint for marking number of votes from a given block
-    struct Checkpoint {
-        uint32 fromBlock;
-        uint256 votes;
-    }
-
-    /// @dev A record of votes checkpoints for each account, by index
-    mapping(address => mapping(uint32 => Checkpoint)) public checkpoints;
-
-    /// @dev The number of checkpoints for each account
-    mapping(address => uint32) public numCheckpoints;
-
-    /// @dev The EIP-712 typehash for the contract's domain
-    bytes32 public constant DOMAIN_TYPEHASH =
-        keccak256(
-            "EIP712Domain(string name,uint256 chainId,address verifyingContract)"
-        );
-
-    /// @dev The EIP-712 typehash for the delegation struct used by the contract
-    bytes32 public constant DELEGATION_TYPEHASH =
-        keccak256("Delegation(address delegatee,uint256 nonce,uint256 expiry)");
-
-    /// @dev A record of states for signing / validating signatures
-    mapping(address => uint) public nonces;
-
-    /// @dev An event thats emitted when an account changes its delegate
-    event DelegateChanged(
-        address indexed delegator,
-        address indexed fromDelegate,
-        address indexed toDelegate
-    );
-
-    /// @dev An event thats emitted when a delegate account's vote balance changes
-    event DelegateVotesChanged(
-        address indexed delegate,
-        uint previousBalance,
-        uint newBalance
-    );
 
     /**
      * @dev Delegate votes from `msg.sender` to `delegatee`
