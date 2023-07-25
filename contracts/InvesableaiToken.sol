@@ -92,6 +92,8 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     );
     event SetWhiteList(address indexed addr, bool status);
     event TransferEnabled(bool enabled);
+    event SetDevTo(address devTo);
+    event SetBuybackTo(address buybackTo);
 
     modifier lockTheSwap() {
         inSwapAndLiquify = true;
@@ -449,6 +451,20 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         require(_addr != address(0), "INVESABLEAI.setWhiteList: Zero Address");
         whitelist[_addr] = _status;
         emit SetWhiteList(_addr, _status);
+    }
+
+    function setDevTo(address _devTo) external onlyOwner {
+        require(_devTo != address(0), "This should not be zero address");
+
+        devTo = _devTo;
+        emit SetDevTo(_devTo);
+    }
+
+    function setBuybackTo(address _buybackTo) external onlyOwner {
+        require(_buybackTo != address(0), "This should not be zero address");
+
+        devTo = _buybackTo;
+        emit SetBuybackTo(_buybackTo);
     }
 
     function swapAndLiquify() private lockTheSwap {
