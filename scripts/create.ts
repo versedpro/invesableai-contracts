@@ -7,9 +7,9 @@ async function main() {
   const tokenV1Contract = await upgrades.deployProxy(
     tokenV1,
     [
-      "0x7089e7a1e4d34faf7ab487ce599ce27d97d340cb",
-      "0x7089e7a1e4d34faf7ab487ce599ce27d97d340cb",
-      "0x7089e7a1e4d34faf7ab487ce599ce27d97d340cb",
+      "0xf571e4FD1A59bfEe6C532BAc84Ab947F7A430c8A",
+      "0xf571e4FD1A59bfEe6C532BAc84Ab947F7A430c8A",
+      "0xf571e4FD1A59bfEe6C532BAc84Ab947F7A430c8A",
     ],
     {
       initializer: "initialize(address, address, address)",
