@@ -32,8 +32,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     /// @dev The number of checkpoints for each account
     mapping(address => uint32) public numCheckpoints;
 
-    uint256 private _totalSupply;
-
     uint256 public maxSupply;
     uint256 public devFee;
     uint256 public liquidityFee;
@@ -44,6 +42,8 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     string private _name;
     string private _symbol;
     uint8 private _decimals;
+
+    uint256 private _totalSupply;
 
     address public devTo;
     address public buybackTo;
@@ -121,7 +121,9 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     }
 
     modifier transferable() {
-        require(transferEnabled == true, "INVA: Transfer disabled yet");
+        if (msg.sender != owner()) {
+            require(transferEnabled == true, "INVA: Transfer disabled yet");
+        }
         _;
     }
 
@@ -155,51 +157,36 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         // Mint to the contract
         _mint(_company, maxSupply);
 
+        uniswapV2Router = IUniswapV2Router02(
+            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+        );
+
         _excludedFromAntiWhale[msg.sender] = true;
         _excludedFromAntiWhale[address(0)] = true;
         _excludedFromAntiWhale[address(this)] = true;
     }
 
     function openTrading() external onlyOwner {
-        uniswapV2Router = IUniswapV2Router02(
-            0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
-        );
-        _approve(address(this), address(uniswapV2Router), maxSupply);
+        transferEnabled = true;
+        _approve(msg.sender, address(uniswapV2Router), maxSupply);
         invaEthPair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(
             address(this),
             uniswapV2Router.WETH()
-        );
-        uniswapV2Router.addLiquidityETH{value: address(this).balance}(
-            address(this),
-            balanceOf(address(this)),
-            0,
-            0,
-            owner(),
-            block.timestamp
         );
         IERC20Upgradeable(invaEthPair).approve(
             address(uniswapV2Router),
             type(uint).max
         );
-        transferEnabled = true;
+        // uniswapV2Router.addLiquidityETH{value: address(this).balance}(
+        //     address(this),
+        //     balanceOf(address(this)),
+        //     0,
+        //     0,
+        //     owner(),
+        //     block.timestamp
+        // );
 
         emit TransferEnabled(transferEnabled);
-    }
-
-    function getOwner() external view returns (address) {
-        return owner();
-    }
-
-    function name() public view override returns (string memory) {
-        return _name;
-    }
-
-    function decimals() public view override returns (uint8) {
-        return _decimals;
-    }
-
-    function symbol() public view override returns (string memory) {
-        return _symbol;
     }
 
     function totalSupply() public view override returns (uint256) {
