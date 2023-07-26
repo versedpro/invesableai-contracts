@@ -50,7 +50,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
 
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled;
-    bool public transferEnabled;
 
     address public invaEthPair;
     IUniswapV2Router02 public uniswapV2Router;
@@ -91,7 +90,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         uint256 total
     );
     event SetWhiteList(address indexed addr, bool status);
-    event TransferEnabled(bool enabled);
     event SetDevTo(address devTo);
     event SetBuybackTo(address buybackTo);
 
@@ -116,13 +114,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
                     "INVA::antiWhale: Transfer amount exceeds the maxTransferAmount"
                 );
             }
-        }
-        _;
-    }
-
-    modifier transferable() {
-        if (msg.sender != owner()) {
-            require(transferEnabled == true, "INVA: Transfer disabled yet");
         }
         _;
     }
@@ -152,8 +143,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         liquidityFee = 3; // 0.03%
         buybackFee = 3; // 0.03%
 
-        transferEnabled = false;
-
         // Mint to the contract
         _mint(_company, maxSupply);
 
@@ -167,7 +156,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     }
 
     function openTrading() external onlyOwner {
-        transferEnabled = true;
         _approve(msg.sender, address(uniswapV2Router), maxSupply);
         invaEthPair = IUniswapV2Factory(uniswapV2Router.factory()).createPair(
             address(this),
@@ -185,8 +173,6 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         //     owner(),
         //     block.timestamp
         // );
-
-        emit TransferEnabled(transferEnabled);
     }
 
     function totalSupply() public view override returns (uint256) {
@@ -261,13 +247,7 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     function transfer(
         address recipient,
         uint256 amount
-    )
-        public
-        override
-        antiWhale(msg.sender, recipient, amount)
-        transferable
-        returns (bool)
-    {
+    ) public override antiWhale(msg.sender, recipient, amount) returns (bool) {
         require(recipient != address(0), "ERC20: transfer to the zero address");
         require(
             balanceOf(msg.sender) >= amount,
@@ -336,13 +316,7 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         address sender,
         address recipient,
         uint256 amount
-    )
-        public
-        override
-        antiWhale(sender, recipient, amount)
-        transferable
-        returns (bool)
-    {
+    ) public override antiWhale(sender, recipient, amount) returns (bool) {
         require(sender != address(0), "ERC20: transfer to the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -434,10 +408,19 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
         maxTransferAmountRate = _maxTransferAmountRate;
     }
 
-    function setWhiteList(address _addr, bool _status) external onlyOwner {
-        require(_addr != address(0), "INVESABLEAI.setWhiteList: Zero Address");
-        whitelist[_addr] = _status;
-        emit SetWhiteList(_addr, _status);
+    function setWhiteList(
+        address[] calldata _addresses,
+        bool _status
+    ) external onlyOwner {
+        for (uint256 i = 0; i < _addresses.length; i++) {
+            require(
+                _addresses[i] != address(0),
+                "INVESABLEAI.setWhiteList: Zero Address"
+            );
+
+            whitelist[_addresses[i]] = _status;
+            emit SetWhiteList(_addresses[i], _status);
+        }
     }
 
     function setDevTo(address _devTo) external onlyOwner {
