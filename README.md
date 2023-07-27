@@ -38,8 +38,8 @@
 
 ### Sepolia
 
-- V1 Proxy: [0xEdfc2eaAAc7a66293531AbE2f293909f48576D23](https://sepolia.etherscan.io/address/0xEdfc2eaAAc7a66293531AbE2f293909f48576D23#readProxyContract)
-- V1 Implementation: [0xba1DFA5bbad20392d46033F38041Fd0563f5Ed4c](https://sepolia.etherscan.io/address/0xba1DFA5bbad20392d46033F38041Fd0563f5Ed4c#code)
+- Proxy: [0x75D744dAfd57EC36A2B92e05Dd08F4Bda3Bc95cb](https://sepolia.etherscan.io/address/0x75D744dAfd57EC36A2B92e05Dd08F4Bda3Bc95cb#readProxyContract)
+- V1 Implementation: [0x51Ee10c0ff455D5025686CA209AC0481EF783c11](https://sepolia.etherscan.io/address/0x51ee10c0ff455d5025686ca209ac0481ef783c11#code)
 - Presale Contract: [0x4f9591d4A215e3Fe024C9E273872fDFf3edd5002](https://sepolia.etherscan.io/address/0xCd1C8505db1ADD99A1dcc759d7257cCdB7A11067#code)
 - Vesting: [0xA46267826DBE5780607868F0790d353F6e12651F](https://sepolia.etherscan.io/address/0xA46267826DBE5780607868F0790d353F6e12651F#code)
 

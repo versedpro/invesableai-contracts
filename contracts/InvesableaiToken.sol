@@ -18,7 +18,7 @@ contract InvesableaiToken is ERC20Upgradeable, OwnableUpgradeable {
     mapping(address => mapping(address => uint256)) private _allowances;
 
     mapping(address => bool) private _excludedFromAntiWhale;
-    mapping(address => bool) whitelist;
+    mapping(address => bool) public whitelist;
 
     /// @dev A record of each accounts delegate
     mapping(address => address) internal _delegates;
