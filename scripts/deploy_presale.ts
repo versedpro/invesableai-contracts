@@ -11,22 +11,22 @@ async function main() {
   // ]);
 
   // Goerli
-  const presale = await ethers.deployContract("Presale", [
-    "0xC6d77b465f23969aB122937F113FfF5dE7a16b7f", // token on Goerli
-    1690597730, // Saturday, August 5, 2023 11:59:59 PM
-    "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6", // WETH address on Goerli
-    "0xEEa85fdf0b05D1E0107A61b4b4DB1f345854B952", // USDC address on Goerli
-    "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e", // ETH-USD price feed on Goerli
-  ]);
+  // const presale = await ethers.deployContract("Presale", [
+  //   "0xC6d77b465f23969aB122937F113FfF5dE7a16b7f", // token on Goerli
+  //   1690597730, // Saturday, August 5, 2023 11:59:59 PM
+  //   "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6", // WETH address on Goerli
+  //   "0xEEa85fdf0b05D1E0107A61b4b4DB1f345854B952", // USDC address on Goerli
+  //   "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e", // ETH-USD price feed on Goerli
+  // ]);
 
   // Mainnet
-  // const presale = await ethers.deployContract("Presale", [
-  //   "0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191", // token address
-  //   1691279999, // Saturday, August 5, 2023 11:59:59 PM
-  //   "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH address on ETH
-  //   "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC address on ETH
-  //   "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419", // ETH-USD price feed on ETH
-  // ]);
+  const presale = await ethers.deployContract("Presale", [
+    "0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191", // token address
+    1691279999, // Saturday, August 5, 2023 11:59:59 PM
+    "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH address on ETH
+    "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC address on ETH
+    "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419", // ETH-USD price feed on ETH
+  ]);
 
   await presale.waitForDeployment();
 

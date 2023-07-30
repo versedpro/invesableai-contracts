@@ -53,4 +53,4 @@
 
 - Proxy: [0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191](https://etherscan.io/address/0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191#readProxyContract)
 - V1 Implementation: [0x43e39C125c13E3Ff1674faF70A38458a54019b80](https://etherscan.io/address/0x43e39C125c13E3Ff1674faF70A38458a54019b80#code)
-- Presale: [0x5D1F344890e66c93EEa416632A23b6F0BDF88cB9](https://etherscan.io/address/0x5D1F344890e66c93EEa416632A23b6F0BDF88cB9#code)
+- Presale: [0x9E7c1911BB00bc63ACC2BeeB6e1eF82d59144547](https://etherscan.io/address/0x9E7c1911BB00bc63ACC2BeeB6e1eF82d59144547#code)
