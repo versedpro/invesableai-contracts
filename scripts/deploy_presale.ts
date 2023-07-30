@@ -22,7 +22,7 @@ async function main() {
   // Mainnet
   const presale = await ethers.deployContract("Presale", [
     "0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191", // token address
-    1691279999, // Saturday, August 5, 2023 11:59:59 PM
+    1692057599, // Monday, August 14, 2023 11:59:59 PM
     "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", // WETH address on ETH
     "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC address on ETH
     "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419", // ETH-USD price feed on ETH
