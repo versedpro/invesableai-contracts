@@ -27,7 +27,6 @@ contract Presale is Ownable, ReentrancyGuard {
     IERC20 public token; // The token being sold
     IERC20 public weth;
     IERC20 public usdc;
-    uint256 public totalTokens = 0; // Total number of tokens for sale
     uint256 public endTime; // End time of presale
     uint256 public currentPhase = 0;
 
@@ -58,7 +57,6 @@ contract Presale is Ownable, ReentrancyGuard {
         priceFeed = AggregatorV3Interface(_priceFeed);
 
         token = _token;
-        totalTokens = 20_000_000 * 10 ** 18; // 2000000 token
         endTime = _endTime;
         weth = _weth;
         usdc = _usdc;
@@ -68,8 +66,8 @@ contract Presale is Ownable, ReentrancyGuard {
             minPurchase: 3_000 * 10 ** 18, // 3000 token for test
             // minPurchase:  3_000 * 10 ** 18, // 300 token,
             maxPurchase: 25_000 * 10 ** 18, // 25000 token,
-            tokensAvailable: 6_000_000 * 10 ** 18, // 6000000 token,
-            tokenPrice: 0.04 * 10 ** 18, // 0.04 USD,
+            tokensAvailable: 7_500_000 * 10 ** 18, // 7.5M token,
+            tokenPrice: 0.01 * 10 ** 18, // 0.01 USD,
             tokensSold: 0
         });
 
@@ -78,8 +76,8 @@ contract Presale is Ownable, ReentrancyGuard {
             minPurchase: 3_000 * 10 ** 18, // 3000 token for test
             // minPurchase: 3_000 * 10 ** 18, // 300 token,
             maxPurchase: 50_000 * 10 ** 18, // 50000 token,
-            tokensAvailable: 3_500_000 * 10 ** 18, // 3500000 token,
-            tokenPrice: 0.044 * 10 ** 18, // 0.044 USD,
+            tokensAvailable: 6_000_000 * 10 ** 18, // 6M token,
+            tokenPrice: 0.012 * 10 ** 18, // 0.012 USD,
             tokensSold: 0
         });
 
@@ -88,8 +86,8 @@ contract Presale is Ownable, ReentrancyGuard {
             minPurchase: 2_000 * 10 ** 18, // 2000 token for test
             // minPurchase: 200000000000000000000, // 200 token
             maxPurchase: 75_000 * 10 ** 18, // 75000 token,
-            tokensAvailable: 3_500_000 * 10 ** 18, // 3500000 token,
-            tokenPrice: 0.046 * 10 ** 18, // 0.046 USD,
+            tokensAvailable: 4_500_000 * 10 ** 18, // 4.5M token,
+            tokenPrice: 0.014 * 10 ** 18, // 0.014 USD,
             tokensSold: 0
         });
 
@@ -98,8 +96,8 @@ contract Presale is Ownable, ReentrancyGuard {
             minPurchase: 2_000 * 10 ** 18, // 2000 token for test
             // minPurchase: 200000000000000000000, // 200 token
             maxPurchase: 75_000 * 10 ** 18, // 75000 token,
-            tokensAvailable: 3_500_000 * 10 ** 18, // 3500000 token,
-            tokenPrice: 0.048 * 10 ** 18, // 0.048 USD,
+            tokensAvailable: 3_000_000 * 10 ** 18, // 3M token,
+            tokenPrice: 0.016 * 10 ** 18, // 0.016 USD,
             tokensSold: 0
         });
 
@@ -108,8 +106,8 @@ contract Presale is Ownable, ReentrancyGuard {
             minPurchase: 1_000 * 10 ** 18, // 1000 token for test
             // minPurchase: 100000000000000000000, // 100 token
             maxPurchase: 100_000 * 10 ** 18, // 100000 token,
-            tokensAvailable: 3_500_000 * 10 ** 18, // 3500000 token,
-            tokenPrice: 0.05 * 10 ** 18, // 0.05 USD,
+            tokensAvailable: 1_500_000 * 10 ** 18, // 1.5M token,
+            tokenPrice: 0.018 * 10 ** 18, // 0.018 USD,
             tokensSold: 0
         });
     }
@@ -143,6 +141,10 @@ contract Presale is Ownable, ReentrancyGuard {
             whitelist[_addresses[i]] = true;
             emit Whitelisted(_addresses[i]);
         }
+    }
+
+    function getTotalBalance() public view returns (uint256) {
+        return token.balanceOf(address(this));
     }
 
     function getCurrentPhase() public view returns (Phase memory) {
@@ -242,7 +244,7 @@ contract Presale is Ownable, ReentrancyGuard {
             block.timestamp > endTime && _timestamp > endTime,
             "Presale is still ongoing"
         );
-        uint256 balance = balances[msg.sender] * 10 ** 18;
+        uint256 balance = balances[msg.sender];
         require(balance > 0, "No tokens to claim");
 
         balances[msg.sender] = 0;
@@ -255,21 +257,28 @@ contract Presale is Ownable, ReentrancyGuard {
         payable(owner()).transfer(address(this).balance);
     }
 
-    function withdrawWeth(address _masterWallet) external onlyOwner {
+    function withdrawWeth() external onlyOwner {
         require(
-            _masterWallet != address(0),
-            "Walelt address should be valid address"
+            weth.balanceOf(address(this)) > 0,
+            "Insufficient funds to withdraw"
         );
 
-        weth.safeTransfer(_masterWallet, weth.balanceOf(address(this)));
+        weth.safeTransfer(owner(), weth.balanceOf(address(this)));
     }
 
-    function withdrawUsdc(address _masterWallet) external onlyOwner {
+    function withdrawUsdc() external onlyOwner {
         require(
-            _masterWallet != address(0),
-            "Walelt address should be valid address"
+            usdc.balanceOf(address(this)) > 0,
+            "Insufficient funds to withdraw"
         );
 
-        usdc.safeTransfer(_masterWallet, usdc.balanceOf(address(this)));
+        usdc.safeTransfer(owner(), usdc.balanceOf(address(this)));
+    }
+
+    function withdrawToken() external onlyOwner {
+        require(block.timestamp > endTime, "Presale is still ongoing");
+        require(token.balanceOf(address(this)) > 0, "All tokens sold out");
+
+        token.transfer(owner(), token.balanceOf(address(this)));
     }
 }
