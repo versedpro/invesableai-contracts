@@ -46,10 +46,11 @@
 ### Goerli (tested)
 
 - Proxy: [0xC6d77b465f23969aB122937F113FfF5dE7a16b7f](https://goerli.etherscan.io/address/0xC6d77b465f23969aB122937F113FfF5dE7a16b7f#readProxyContract)
-- Implementation: [0x49d8F9C2B372CEA6055dfAD2009883146813b870](https://goerli.etherscan.io/address/0x49d8f9c2b372cea6055dfad2009883146813b870#code)
-- Persale [0x8b8b2a04F45c128E2915442cBC16EBa86743d633](https://goerli.etherscan.io/address/0x8b8b2a04F45c128E2915442cBC16EBa86743d633#code)
+- V1 Implementation: [0x49d8F9C2B372CEA6055dfAD2009883146813b870](https://goerli.etherscan.io/address/0x49d8f9c2b372cea6055dfad2009883146813b870#code)
+- Persale [0x9303FC9175146e6d93264D632bB4aE82E69dfD0e](https://goerli.etherscan.io/address/0x9303FC9175146e6d93264D632bB4aE82E69dfD0e#code)
 
 ### Mainnet
 
-- V1 Proxy: [0x2986c15C72D8BB76d7f97c701350779A00169138](https://etherscan.io/address/0x2986c15C72D8BB76d7f97c701350779A00169138#readProxyContract)
-- V1 Implementation: [0x9446b2060c6254938a03AdC10EbD9fc81D714d6C](https://etherscan.io/address/0x9446b2060c6254938a03AdC10EbD9fc81D714d6C#code)
+- Proxy: [0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191](https://etherscan.io/address/0x9Ddfb2C0C7d334D8F7B1227169482f13E26f2191#readProxyContract)
+- V1 Implementation: [0x43e39C125c13E3Ff1674faF70A38458a54019b80](https://etherscan.io/address/0x43e39C125c13E3Ff1674faF70A38458a54019b80#code)
+- Presale: [0x5D1F344890e66c93EEa416632A23b6F0BDF88cB9](https://etherscan.io/address/0x5D1F344890e66c93EEa416632A23b6F0BDF88cB9#code)
