@@ -31,6 +31,7 @@ contract Presale is Ownable, ReentrancyGuard {
     uint256 public currentPhase = 0;
 
     bool public claimingEnabled = false;
+    bool public whitelistEnabled = true;
 
     event TokensPurchased(
         address indexed buyer,
@@ -143,6 +144,14 @@ contract Presale is Ownable, ReentrancyGuard {
         }
     }
 
+    function setEndTime(uint256 _endTime) external onlyOwner {
+        endTime = _endTime;
+    }
+
+    function setWhitelistAbility(bool _enable) external onlyOwner {
+        whitelistEnabled = _enable;
+    }
+
     function getTotalBalance() public view returns (uint256) {
         return token.balanceOf(address(this));
     }
@@ -169,10 +178,8 @@ contract Presale is Ownable, ReentrancyGuard {
             block.timestamp < endTime || currentPhase < 5,
             "Presale has ended"
         );
-        require(
-            whitelist[msg.sender] || currentPhase > 0,
-            "You are not whitelisted"
-        );
+        if (whitelistEnabled)
+            require(whitelist[msg.sender], "You are not whitelisted");
 
         uint256 tokensToBuy = _amount;
         require(tokensToBuy > 0, "Invalid amount");
